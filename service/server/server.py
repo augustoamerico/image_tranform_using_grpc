@@ -17,7 +17,7 @@ class ImageServiceServer(rpc.ImageServiceServicer):
     def __init__(self):
         self.images = defaultdict(io.BytesIO)
         logging.info("successfuly created the images store")
-        self.googlyeyezer = GooglyEyezer()
+        self.googlyeyezer = GooglyEyezer(os.environ["GOOGLY_EYE_PATH"])
 
     def Upload(self, request_iterator, context):
         i = 0
@@ -59,7 +59,10 @@ class ImageServiceServer(rpc.ImageServiceServicer):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    port = 22223
+    try:
+        port = int(os.environ["PORT"])
+    except KeyError:
+        port = 22222
     grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     rpc.add_ImageServiceServicer_to_server(ImageServiceServer(), grpc_server)
     grpc_server.add_insecure_port(f"[::]:{port}")

@@ -78,9 +78,11 @@ im.show()
 raw_url = "https://www.tenhomaisdiscosqueamigos.com/wp-content/uploads/2017/06/dave-grohl-2013-shutterstock.jpg"
 img_url = raw_url.strip()
 
-with urllib.request.urlopen("http://www.python.org") as url:
+with urllib.request.urlopen(raw_url) as url:
     resp = url.read()
-    image = np.asarray(bytesarray(resp), dtype="uint8")
+    image = np.asarray(bytearray(resp), dtype="uint8")
     image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    cv2.show("img", image)
+    cv2.imshow("img", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 """

@@ -1,17 +1,15 @@
 import uuid
 import datetime
 import logging
-import json
 from flask import Flask, flash, request, redirect, make_response, render_template_string
 from PIL import Image
-import requests
 from io import BytesIO
 import urllib
+import os
 
 import grpc
 import ImageService_pb2 as service
 import ImageService_pb2_grpc as rpc
-from google.protobuf.json_format import MessageToJson
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", ".gif"}
 CHUNK_SIZE = 1024 * 1024
@@ -59,7 +57,6 @@ def upload_file():
         my_result = []
         while True:
             b = file.read(CHUNK_SIZE)
-            logging.info(b)
             if b:
                 result = service.ImageUploadRequest(
                     Content=b,
@@ -107,6 +104,11 @@ def upload_file():
 
 
 if __name__ == "__main__":
-    channel = grpc.insecure_channel("localhost:22223")
+    try:
+        grpc_host = os.environ["GRPC_SERVER"]
+    except KeyError:
+        grpc_host = "localhost:22222"
+    channel = grpc.insecure_channel(grpc_host)
+    logging.info(f"connecting grpc server @{grpc_host}")
     stub = rpc.ImageServiceStub(channel)
     app.run(host="0.0.0.0")
