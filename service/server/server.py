@@ -50,7 +50,7 @@ if __name__ == '__main__':
     port = 22223
     grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     rpc.add_ImageServiceServicer_to_server(ImageServiceServer(), grpc_server)
-    logging.info(f'Starting server. Listening at {port}...')
     grpc_server.add_insecure_port(f'[::]:{port}')
     grpc_server.start()
+    logging.info(f'Server started. Listening at {port}...')
     grpc_server.wait_for_termination()
