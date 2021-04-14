@@ -7,8 +7,8 @@ import logging
 import requests
 import grpc
 
-from image_service_grpc import ImageService_pb2 as service
-from image_service_grpc import ImageService_pb2_grpc as rpc
+import ImageService_pb2 as service
+import ImageService_pb2_grpc as rpc
 
 from domain.image_googlyeyz import GooglyEyezer
 

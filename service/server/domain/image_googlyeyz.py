@@ -60,12 +60,27 @@ class GooglyEyezer:
 
 """
 googlyzer = GooglyEyezer('/home/tds/Pictures/googly_eye_tr.png')
-image =  open('/home/tds/Pictures/joao_pedro_antonio.jpg', 'rb')
-f = image.read()
-b = bytearray(f)
-image_in_bytes = BytesIO(b)
-response_bytes = googlyzer.apply(image_in_bytes, "png")
+raw_url = "https://www.tenhomaisdiscosqueamigos.com/wp-content/uploads/2017/06/dave-grohl-2013-shutterstock.jpg"
+img_url = raw_url.strip()
+img_pil = Image.open(requests.get(img_url, stream=True).raw)
+image_in_bytes = BytesIO(img_pil.tobytes())
+
+#image =  open('/home/tds/Pictures/joao_pedro_antonio.jpg', 'rb')
+#f = image.read()
+#b = bytearray(f)
+#image_in_bytes = BytesIO(b)
+response_bytes = googlyzer.apply(image_in_bytes, "jpg")
 im = Image.open(image_in_bytes).convert("RGBA")
 image_in_bytes.close()
 im.show()
+
+
+raw_url = "https://www.tenhomaisdiscosqueamigos.com/wp-content/uploads/2017/06/dave-grohl-2013-shutterstock.jpg"
+img_url = raw_url.strip()
+
+with urllib.request.urlopen("http://www.python.org") as url:
+    resp = url.read()
+    image = np.asarray(bytesarray(resp), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    cv2.show("img", image)
 """

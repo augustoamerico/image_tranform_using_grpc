@@ -22,5 +22,5 @@ message ImageUploadResponse {
 }
 
 service ImageService {
-    rpc Upload (stream ImageUploadRequest) returns (stream ImageUploadResponse) {};
+    rpc Upload (stream ImageUploadRequest) returns (ImageUploadResponse) {};
 }

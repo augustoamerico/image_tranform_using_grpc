@@ -4,11 +4,13 @@ import logging
 import json
 from flask import Flask, flash, request, redirect, make_response, render_template_string
 from PIL import Image
-import urllib2
+import requests
+from io import BytesIO
+import urllib
 
 import grpc
-from image_service_grpc import ImageService_pb2 as service
-from image_service_grpc import ImageService_pb2_grpc as rpc
+import ImageService_pb2 as service
+import ImageService_pb2_grpc as rpc
 from google.protobuf.json_format import MessageToJson
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", ".gif"}
@@ -25,6 +27,7 @@ def allowed_file(filename):
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
+        filename = None
         if "selected_files" not in request.files and "image_url" not in request.form:
             flash("No 'selected_files' part nor image url")
             return redirect(request.url)
@@ -36,17 +39,27 @@ def upload_file():
             if file.filename == "":
                 flash("You must select at least one file")
                 return redirect(request.url)
+            else:
+                filename = file.filename
 
-            if file and allowed_file(file.filename):
+            if file and allowed_file(filename):
                 fileid = f"{datetime.datetime.utcnow().isoformat()}-{uuid.uuid4()}"
         else:
+            filename = request.form["image_url"].strip()
+            logging.info(filename)
+            img_extension = filename.split(".")[-1].strip()
+            if img_extension.lower() == "jpg":
+                img_extension = "jpeg"
+            url = urllib.request.urlopen(filename)
+            file = BytesIO(url.read())
 
-            file = Image.open(urllib2.urlopen(request.form["image_url"].strip()))
+            fileid = f"{datetime.datetime.utcnow().isoformat()}-{uuid.uuid4()}"
 
         # def upload_request_generator():  # this generates our grpc `stream ImageUploadRequest`
         my_result = []
         while True:
             b = file.read(CHUNK_SIZE)
+            logging.info(b)
             if b:
                 result = service.ImageUploadRequest(
                     Content=b,
@@ -67,14 +80,12 @@ def upload_file():
 
         result = stub.Upload(my_result)
         logging.info(result)
-        logging.info(f"file {file.filename} was upload successfully")
+        logging.info(f"file {filename} was upload successfully")
 
         response = make_response(result.Content)
         response.headers.set("Content-Type", "image/jpeg")
         response.headers.set(
-            "Content-Disposition",
-            "attachment",
-            filename=f"{file.filename}_googlyeyzed.jpg",
+            "Content-Disposition", "attachment", filename=f"{filename}_googlyeyzed.jpg"
         )
         return response
     return render_template_string(
