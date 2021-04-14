@@ -12,7 +12,7 @@ import ImageService_pb2_grpc as rpc
 
 from domain.image_googlyeyz import GooglyEyezer
 
-class ImageServiceServer(rpc.ImageServiceServicer):  # inheriting here from the protobuf rpc file which is generated
+class ImageServiceServer(rpc.ImageServiceServicer):
 
     def __init__(self):
         self.images = defaultdict(io.BytesIO)
