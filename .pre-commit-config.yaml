@@ -13,3 +13,4 @@ repos:
     rev: 0.812 
     hooks:
     -   id: mypy
+        verbose: true
