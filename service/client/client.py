@@ -1,4 +1,3 @@
-# flake8: noqa
 import uuid
 import datetime
 import logging
