@@ -10,7 +10,7 @@ import ImageService_pb2_grpc as rpc
 from google.protobuf.json_format import MessageToJson
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', '.gif'}
-CHUNK_SIZE = 1024 * 1024  # decrease the value here to evaluate memory usage
+CHUNK_SIZE = 1024 * 1024
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
