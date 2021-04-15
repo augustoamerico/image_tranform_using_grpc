@@ -1,7 +1,15 @@
 import uuid
 import datetime
 import logging
-from flask import Flask, flash, request, redirect, make_response, render_template_string
+from flask import (
+    Flask,
+    flash,
+    request,
+    redirect,
+    make_response,
+    render_template_string,
+    send_from_directory,
+)
 from PIL import Image
 from io import BytesIO
 import urllib
@@ -20,6 +28,21 @@ logging.basicConfig(level=logging.INFO)
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route("/js/<path:path>")
+def static_js_dir(path):
+    return send_from_directory("static/js", path)
+
+
+@app.route("/assets/<path:path>")
+def static_assets_dir(path):
+    return send_from_directory("static/assets", path)
+
+
+@app.route("/<path:path>")
+def static_dir(path):
+    return send_from_directory("static/", path)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -85,22 +108,23 @@ def upload_file():
             "Content-Disposition", "attachment", filename=f"{filename}_googlyeyzed.jpg"
         )
         return response
-    return render_template_string(
-        """
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=selected_files>
-      <input type=submit value=Upload Local Image>
-    </form>
-    <form method=post enctype=multipart/form-data>
-      <input type=text name=image_url>
-      <input type=submit value=Upload Image URL>
-    </form>
-    """,
-        json_response=request.args.get("json"),
-    )
+    return send_from_directory("static", "index.html")
+    # return render_template_string(
+    #    """
+    # <!doctype html>
+    # <title>Upload new File</title>
+    # <h1>Upload new File</h1>
+    # <form method=post enctype=multipart/form-data>
+    #  <input type=file name=selected_files>
+    #  <input type=submit value=Upload Local Image>
+    # </form>
+    # <form method=post enctype=multipart/form-data>
+    #  <input type=text name=image_url>
+    #  <input type=submit value=Upload Image URL>
+    # </form>
+    # """,
+    #    json_response=request.args.get("json"),
+    # )
 
 
 if __name__ == "__main__":
@@ -108,7 +132,12 @@ if __name__ == "__main__":
         grpc_host = os.environ["GRPC_SERVER"]
     except KeyError:
         grpc_host = "localhost:22222"
+
+    try:
+        port = int(os.environ["PORT"])
+    except KeyError:
+        port = 5000
     channel = grpc.insecure_channel(grpc_host)
     logging.info(f"connecting grpc server @{grpc_host}")
     stub = rpc.ImageServiceStub(channel)
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=port)
